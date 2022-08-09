@@ -23,7 +23,7 @@ func (m Model) Init() tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
-	for _, model := range tabModels {
+	for _, model := range m.tabModels {
 		cmd = model.Init()
 		cmds = append(cmds, cmd)
 	}
@@ -36,10 +36,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
-	m.tabModels[currentTab], cmd = m.tabModels[currentTab].Update(msg)
+	m.tabModels[m.currentTab], cmd = m.tabModels[m.currentTab].Update(msg)
 	cmds = append(cmds, cmd)
 
-	return tea.Batch(cmds...)
+	return m, tea.Batch(cmds...)
 
 }
 
@@ -53,7 +53,7 @@ func (m *Model) TabTitles() []string {
 }
 
 func (m *Model) SetTabTitles(titles []string) {
-	if len(titles) != m.totalTabs {
+	if len(titles) != int(m.totalTabs) {
 		return
 	}
 	m.tabTitles = titles
@@ -64,7 +64,7 @@ func (m *Model) TabModels() []tea.Model {
 }
 
 func (m *Model) SetTabModels(models []tea.Model) {
-	if len(models) != m.totalTabs {
+	if len(models) != int(m.totalTabs) {
 		return
 	}
 	m.tabModels = models
