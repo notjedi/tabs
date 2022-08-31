@@ -1,7 +1,10 @@
 package tabs
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
@@ -32,20 +35,30 @@ func (m Model) Init() tea.Cmd {
 
 // TODO: set size function and handle `tea.WindowSizeMsg` in Update loop
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-
 	var cmd tea.Cmd
-	var cmds []tea.Cmd
-
 	m.tabModels[m.currentTab], cmd = m.tabModels[m.currentTab].Update(msg)
-	cmds = append(cmds, cmd)
 
-	return m, tea.Batch(cmds...)
-
+	return m, cmd
 }
 
 func (m Model) View() string {
-	// TODO: style(title) + content
-	return ""
+	var tabs []string
+	for i, tabTitle := range m.tabTitles {
+		if m.currentTab == uint(i) {
+			tabs = append(tabs, activeTab.Render(tabTitle))
+		} else {
+			tabs = append(tabs, inactiveTab.Render(tabTitle))
+		}
+	}
+
+    // TODO: take width into account
+	renderedTabs := lipgloss.NewStyle().
+		// Width(width).
+		// MaxWidth(width).
+		Render(lipgloss.JoinHorizontal(lipgloss.Top, strings.Join(tabs, "|")))
+
+	return lipgloss.JoinVertical(lipgloss.Top,
+		renderedTabs, docStyle.Render(m.tabModels[m.currentTab].View()))
 }
 
 func (m *Model) TabTitles() []string {
