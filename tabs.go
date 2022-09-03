@@ -17,15 +17,15 @@ const (
 type Model struct {
 	tabTitles  []string
 	tabModels  []tea.Model
-	totalTabs  uint
+	totalTabs  int
 	currentTab int
-	Width      uint
-	Height     uint
+	Width      int
+	Height     int
 	// TODO: add/move styles
 	TitleStyle lipgloss.Style
 }
 
-func New(totalTabs uint) Model {
+func New(totalTabs int) Model {
 	var titleStyle = lipgloss.NewStyle().Align(lipgloss.Center)
 	return Model{
 		currentTab: -1,
@@ -52,7 +52,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	// TODO: add keybinds
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.Width = uint(msg.Width)
+		m.Width = msg.Width
 		// just update width
 		m.TitleStyle = m.TitleStyle.
 			Width(msg.Width).
@@ -91,7 +91,7 @@ func (m *Model) TabTitles() []string {
 }
 
 func (m *Model) SetTabTitles(titles []string) {
-	if len(titles) != int(m.totalTabs) {
+	if len(titles) != m.totalTabs {
 		return
 	}
 	m.tabTitles = titles
@@ -102,7 +102,7 @@ func (m *Model) TabModels() []tea.Model {
 }
 
 func (m *Model) SetTabModels(models []tea.Model) {
-	if len(models) != int(m.totalTabs) {
+	if len(models) != m.totalTabs {
 		return
 	}
 	m.tabModels = models
@@ -116,7 +116,7 @@ func (m *Model) SetCurrentTab(tab int) {
 	m.currentTab = tab
 }
 
-func (m *Model) SetWidth(width uint) {
+func (m *Model) SetWidth(width int) {
 	m.Width = width
 }
 
