@@ -46,7 +46,6 @@ func (m Model) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-// TODO: set size function and handle `tea.WindowSizeMsg` in Update loop
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -57,12 +56,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.TitleStyle = m.TitleStyle.
 			Width(msg.Width).
 			MaxWidth(msg.Width)
-
-		// TODO: how to go about this?
-		// should i componsate for the height taken up by the header?
-		// or should i define `Height` as a constant and let the user handle it?
-		_, v := docStyle.GetFrameSize()
-		msg.Height -= v
 	}
 
 	m.tabModels[m.currentTab], cmd = m.tabModels[m.currentTab].Update(msg)
@@ -80,7 +73,6 @@ func (m Model) View() string {
 	}
 	renderedTabs := truncate.StringWithTail(strings.Join(tabs, splitter), m.Width, ellipsis)
 
-	// TODO: should i add a docstyle here?
 	return lipgloss.JoinVertical(lipgloss.Top,
 		m.TitleStyle.Render(renderedTabs),
 		m.tabModels[m.currentTab].View())
