@@ -5,6 +5,13 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/reflow/truncate"
+)
+
+const (
+	Height   = 1
+	ellipsis = "…"
+	splitter = " | "
 )
 
 type Model struct {
@@ -12,14 +19,19 @@ type Model struct {
 	tabModels  []tea.Model
 	totalTabs  uint
 	currentTab uint
-	width      int
-	// TODO: add styles
+	Width      uint
+	Height     uint
+	// TODO: add/move styles
+	TitleStyle lipgloss.Style
 }
 
 func New(totalTabs uint) Model {
+	var titleStyle = lipgloss.NewStyle().Align(lipgloss.Center)
 	return Model{
 		currentTab: 0,
 		totalTabs:  totalTabs,
+		Height:     Height,
+		TitleStyle: titleStyle,
 	}
 }
 
@@ -40,12 +52,17 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.width = msg.Width
-        // TODO: how to go about this?
-        // should i componsate for the height taken up by the header?
-        // or should i define `Height` as a constant and let the user handle it?
+		m.Width = msg.Width
+		// just update width
+		m.TitleStyle = m.TitleStyle.
+			Width(msg.Width).
+			MaxWidth(msg.Width)
+
+		// TODO: how to go about this?
+		// should i componsate for the height taken up by the header?
+		// or should i define `Height` as a constant and let the user handle it?
 		_, v := docStyle.GetFrameSize()
-        msg.Height -= v
+		msg.Height -= v
 	}
 
 	m.tabModels[m.currentTab], cmd = m.tabModels[m.currentTab].Update(msg)
@@ -61,15 +78,12 @@ func (m Model) View() string {
 			tabs = append(tabs, inactiveTab.Render(tabTitle))
 		}
 	}
+	renderedTabs := truncate.StringWithTail(strings.Join(tabs, splitter), m.Width, ellipsis)
 
-	// TODO: take width into account, ellipsize extra text
-	renderedTabs := lipgloss.NewStyle().
-		Width(m.width).
-		MaxWidth(m.width).
-		Render(lipgloss.JoinHorizontal(lipgloss.Top, strings.Join(tabs, "|")))
-
+	// TODO: should i add a docstyle here?
 	return lipgloss.JoinVertical(lipgloss.Top,
-		renderedTabs, docStyle.Render(m.tabModels[m.currentTab].View()))
+		m.TitleStyle.Render(renderedTabs),
+		m.tabModels[m.currentTab].View())
 }
 
 func (m *Model) TabTitles() []string {
@@ -94,10 +108,6 @@ func (m *Model) SetTabModels(models []tea.Model) {
 	m.tabModels = models
 }
 
-func (m *Model) Width() int {
-	return m.width
-}
-
-func (m *Model) SetWidth(w int) {
-	m.width = w
+func (m *Model) SetTitleStyle(titleStyle lipgloss.Style) {
+	m.TitleStyle = titleStyle
 }
