@@ -12,6 +12,7 @@ type Model struct {
 	tabModels  []tea.Model
 	totalTabs  uint
 	currentTab uint
+	width      int
 	// TODO: add styles
 }
 
@@ -36,8 +37,18 @@ func (m Model) Init() tea.Cmd {
 // TODO: set size function and handle `tea.WindowSizeMsg` in Update loop
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
-	m.tabModels[m.currentTab], cmd = m.tabModels[m.currentTab].Update(msg)
 
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+        // TODO: how to go about this?
+        // should i componsate for the height taken up by the header?
+        // or should i define `Height` as a constant and let the user handle it?
+		_, v := docStyle.GetFrameSize()
+        msg.Height -= v
+	}
+
+	m.tabModels[m.currentTab], cmd = m.tabModels[m.currentTab].Update(msg)
 	return m, cmd
 }
 
@@ -51,10 +62,10 @@ func (m Model) View() string {
 		}
 	}
 
-    // TODO: take width into account
+	// TODO: take width into account, ellipsize extra text
 	renderedTabs := lipgloss.NewStyle().
-		// Width(width).
-		// MaxWidth(width).
+		Width(m.width).
+		MaxWidth(m.width).
 		Render(lipgloss.JoinHorizontal(lipgloss.Top, strings.Join(tabs, "|")))
 
 	return lipgloss.JoinVertical(lipgloss.Top,
@@ -81,4 +92,12 @@ func (m *Model) SetTabModels(models []tea.Model) {
 		return
 	}
 	m.tabModels = models
+}
+
+func (m *Model) Width() int {
+	return m.width
+}
+
+func (m *Model) SetWidth(w int) {
+	m.width = w
 }
