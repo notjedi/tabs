@@ -51,7 +51,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.Width = msg.Width
+		m.Width = uint(msg.Width)
 		// just update width
 		m.TitleStyle = m.TitleStyle.
 			Width(msg.Width).
@@ -98,10 +98,6 @@ func (m *Model) SetTabModels(models []tea.Model) {
 		return
 	}
 	m.tabModels = models
-}
-
-func (m *Model) Width() uint {
-	return m.Width
 }
 
 func (m *Model) SetWidth(width uint) {

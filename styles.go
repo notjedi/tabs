@@ -5,8 +5,6 @@ import (
 )
 
 var(
-	docStyle = lipgloss.NewStyle().Margin(1, 2, 1, 2)
-
     inactiveTab = lipgloss.NewStyle().
 		Faint(true).
 		Padding(0, 2)
