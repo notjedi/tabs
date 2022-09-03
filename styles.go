@@ -4,10 +4,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var(
-    inactiveTab = lipgloss.NewStyle().
-		Faint(true).
-		Padding(0, 2)
+var (
+	inactiveTab = lipgloss.NewStyle().
+			Faint(true).
+			Padding(0, 2)
 	activeTab = inactiveTab.
 			Copy().
 			Faint(false).
