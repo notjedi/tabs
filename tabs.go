@@ -100,6 +100,14 @@ func (m *Model) SetTabModels(models []tea.Model) {
 	m.tabModels = models
 }
 
+func (m *Model) Width() uint {
+	return m.Width
+}
+
+func (m *Model) SetWidth(width uint) {
+	m.Width = width
+}
+
 func (m *Model) SetTitleStyle(titleStyle lipgloss.Style) {
 	m.TitleStyle = titleStyle
 }
