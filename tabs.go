@@ -18,7 +18,7 @@ type Model struct {
 	tabTitles  []string
 	tabModels  []tea.Model
 	totalTabs  uint
-	currentTab uint
+	currentTab int
 	Width      uint
 	Height     uint
 	// TODO: add/move styles
@@ -28,7 +28,7 @@ type Model struct {
 func New(totalTabs uint) Model {
 	var titleStyle = lipgloss.NewStyle().Align(lipgloss.Center)
 	return Model{
-		currentTab: 0,
+		currentTab: -1,
 		totalTabs:  totalTabs,
 		Height:     Height,
 		TitleStyle: titleStyle,
@@ -49,6 +49,7 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 
+	// TODO: add keybinds
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.Width = uint(msg.Width)
@@ -58,21 +59,28 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			MaxWidth(msg.Width)
 	}
 
-	m.tabModels[m.currentTab], cmd = m.tabModels[m.currentTab].Update(msg)
-	return m, cmd
+	// TODO: should i print a warning or something like that here?
+	if m.currentTab >= 0 {
+		m.tabModels[m.currentTab], cmd = m.tabModels[m.currentTab].Update(msg)
+		return m, cmd
+	}
+	return m, nil
 }
 
 func (m Model) View() string {
+	if m.currentTab < 0 {
+		return ""
+	}
+
 	var tabs []string
 	for i, tabTitle := range m.tabTitles {
-		if m.currentTab == uint(i) {
+		if m.currentTab == i {
 			tabs = append(tabs, activeTab.Render(tabTitle))
 		} else {
 			tabs = append(tabs, inactiveTab.Render(tabTitle))
 		}
 	}
 	renderedTabs := truncate.StringWithTail(strings.Join(tabs, splitter), m.Width, ellipsis)
-
 	return lipgloss.JoinVertical(lipgloss.Top,
 		m.TitleStyle.Render(renderedTabs),
 		m.tabModels[m.currentTab].View())
@@ -98,6 +106,14 @@ func (m *Model) SetTabModels(models []tea.Model) {
 		return
 	}
 	m.tabModels = models
+}
+
+func (m *Model) CurrentTab() int {
+	return m.currentTab
+}
+
+func (m *Model) SetCurrentTab(tab int) {
+	m.currentTab = tab
 }
 
 func (m *Model) SetWidth(width uint) {
