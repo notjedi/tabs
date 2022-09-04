@@ -80,7 +80,7 @@ func (m Model) View() string {
 			tabs = append(tabs, inactiveTab.Render(tabTitle))
 		}
 	}
-	renderedTabs := truncate.StringWithTail(strings.Join(tabs, splitter), m.Width, ellipsis)
+	renderedTabs := truncate.StringWithTail(strings.Join(tabs, splitter), uint(m.Width), ellipsis)
 	return lipgloss.JoinVertical(lipgloss.Top,
 		m.TitleStyle.Render(renderedTabs),
 		m.tabModels[m.currentTab].View())
