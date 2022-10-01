@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	Height   = 1
-	ellipsis = "…"
-	splitter = " | "
+	TabHeight = 1
+	ellipsis  = "…"
+	splitter  = " | "
 )
 
 type Model struct {
@@ -19,8 +19,8 @@ type Model struct {
 	tabModels  []tea.Model
 	totalTabs  int
 	currentTab int
-	Width      int
-	Height     int
+	width      int
+	height     int
 	// TODO: add/move styles
 	TitleStyle lipgloss.Style
 }
@@ -30,7 +30,6 @@ func New(totalTabs int) Model {
 	return Model{
 		currentTab: -1,
 		totalTabs:  totalTabs,
-		Height:     Height,
 		TitleStyle: titleStyle,
 	}
 }
@@ -52,11 +51,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	// TODO: add keybinds
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.Width = msg.Width
-		// just update width
-		m.TitleStyle = m.TitleStyle.
-			Width(msg.Width).
-			MaxWidth(msg.Width)
+		m.SetSize(msg.Width, msg.Height)
 	}
 
 	// TODO: should i print a warning or something like that here?
@@ -80,10 +75,11 @@ func (m Model) View() string {
 			tabs = append(tabs, inactiveTab.Render(tabTitle))
 		}
 	}
-	renderedTabs := truncate.StringWithTail(strings.Join(tabs, splitter), uint(m.Width), ellipsis)
-	return lipgloss.JoinVertical(lipgloss.Top,
+	renderedTabs := truncate.StringWithTail(strings.Join(tabs, splitter), uint(m.width), ellipsis)
+	content := lipgloss.JoinVertical(lipgloss.Top,
 		m.TitleStyle.Render(renderedTabs),
 		m.tabModels[m.currentTab].View())
+	return lipgloss.NewStyle().Height(m.height).Render(content)
 }
 
 func (m *Model) TabTitles() []string {
@@ -116,10 +112,22 @@ func (m *Model) SetCurrentTab(tab int) {
 	m.currentTab = tab
 }
 
-func (m *Model) SetWidth(width int) {
-	m.Width = width
-}
-
 func (m *Model) SetTitleStyle(titleStyle lipgloss.Style) {
 	m.TitleStyle = titleStyle
+}
+
+func (m *Model) SetWidth(width int) {
+	m.SetSize(width, m.height)
+}
+
+func (m *Model) SetHeight(height int) {
+	m.SetSize(m.width, height)
+}
+
+func (m *Model) SetSize(width, height int) {
+	m.width = width
+	m.height = height
+	m.TitleStyle = m.TitleStyle.
+		Width(m.width).
+		MaxWidth(m.width)
 }
