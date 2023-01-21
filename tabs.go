@@ -26,7 +26,7 @@ type Model struct {
 }
 
 func New(totalTabs int) Model {
-	var titleStyle = lipgloss.NewStyle().Align(lipgloss.Center)
+	titleStyle := lipgloss.NewStyle().Align(lipgloss.Center)
 	return Model{
 		currentTab: -1,
 		totalTabs:  totalTabs,
@@ -52,6 +52,15 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
+	case tea.KeyMsg:
+		if msg.Type == tea.KeyRight || msg.String() == "l" {
+			m.currentTab = (m.currentTab + 1) % m.totalTabs
+		} else if msg.Type == tea.KeyLeft || msg.String() == "h" {
+			m.currentTab = m.currentTab - 1
+			if m.currentTab <= -1 {
+				m.currentTab = m.totalTabs - 1
+			}
+		}
 	}
 
 	// TODO: should i print a warning or something like that here?
@@ -87,6 +96,8 @@ func (m *Model) TabTitles() []string {
 }
 
 func (m *Model) SetTabTitles(titles []string) {
+	// TODO: error out, instead of just returning
+	// TODO: do not let the user change the number of tabs once it's already created?
 	if len(titles) != m.totalTabs {
 		return
 	}
@@ -98,6 +109,7 @@ func (m *Model) TabModels() []tea.Model {
 }
 
 func (m *Model) SetTabModels(models []tea.Model) {
+	// TODO: error out, instead of just returning
 	if len(models) != m.totalTabs {
 		return
 	}
@@ -130,4 +142,8 @@ func (m *Model) SetSize(width, height int) {
 	m.TitleStyle = m.TitleStyle.
 		Width(m.width).
 		MaxWidth(m.width)
+}
+
+func (m *Model) TotalTabs() int {
+	return m.totalTabs
 }
