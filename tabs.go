@@ -48,6 +48,7 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 
+	// TODO: call Init method on page change for the first time
 	// TODO: add keybinds
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -55,11 +56,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case tea.KeyMsg:
 		if msg.Type == tea.KeyRight || msg.String() == "l" {
 			m.currentTab = (m.currentTab + 1) % m.totalTabs
+			return m, nil
 		} else if msg.Type == tea.KeyLeft || msg.String() == "h" {
 			m.currentTab = m.currentTab - 1
 			if m.currentTab <= -1 {
 				m.currentTab = m.totalTabs - 1
 			}
+			return m, nil
 		}
 	}
 
